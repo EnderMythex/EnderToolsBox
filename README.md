@@ -1,7 +1,7 @@
 # ⚙️ EnderToolsBox
 
 ![Version](https://img.shields.io/badge/Version-0.3.0-0d1117?style=for-the-badge&logo=vercel&logoColor=white&labelColor=4caf50)
-
+![Android](https://img.shields.io/badge/Android-Disponible-0d1117?style=for-the-badge&logo=android&logoColor=white&labelColor=4caf50)
 
 ## Fonctionnalités
 
