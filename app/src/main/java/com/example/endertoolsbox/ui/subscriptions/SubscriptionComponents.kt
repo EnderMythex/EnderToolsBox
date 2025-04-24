@@ -2,20 +2,32 @@ package com.example.endertoolsbox.ui.subscriptions
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import com.example.endertoolsbox.models.Period
 import com.example.endertoolsbox.models.Subscription
 import java.time.LocalDateTime
@@ -111,9 +123,17 @@ fun AddSubscriptionDialog(
     var price by remember { mutableStateOf("") }
     var period by remember { mutableStateOf(Period.MONTHLY) }
     var reminderEnabled by remember { mutableStateOf(true) }
+    var isKeyboardVisible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            // Masquer le clavier lors de la fermeture du dialogue
+            keyboardController?.hide()
+            focusManager.clearFocus()
+            onDismiss()
+        },
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
         title = {
             Text(
@@ -126,36 +146,54 @@ fun AddSubscriptionDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
+                    .padding(vertical = 16.dp)
+                    .imePadding(), // Adaptation automatique au clavier
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Nom") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isKeyboardVisible = it.isFocused },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     ),
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    singleLine = true
                 )
 
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it.replace(",", ".") },
                     label = { Text("Prix") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged { isKeyboardVisible = it.isFocused },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     ),
-                    shape = MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            isKeyboardVisible = false
+                            focusManager.clearFocus()
+                        }
+                    ),
+                    singleLine = true
                 )
 
-                // Sélection de période redessinée
+                // Sélection de période redessinée (toujours visible)
                 Column {
                     Text(
                         "Période de facturation",
@@ -172,14 +210,26 @@ fun AddSubscriptionDialog(
                         PeriodSelectionChip(
                             text = "Mensuel",
                             selected = period == Period.MONTHLY,
-                            onClick = { period = Period.MONTHLY },
+                            onClick = { 
+                                period = Period.MONTHLY
+                                // Masquer le clavier lorsqu'on clique sur cette option
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isKeyboardVisible = false
+                            },
                             modifier = Modifier.weight(1f)
                         )
 
                         PeriodSelectionChip(
                             text = "Annuel",
                             selected = period == Period.YEARLY,
-                            onClick = { period = Period.YEARLY },
+                            onClick = { 
+                                period = Period.YEARLY
+                                // Masquer le clavier lorsqu'on clique sur cette option
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isKeyboardVisible = false
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -199,7 +249,13 @@ fun AddSubscriptionDialog(
 
                     Switch(
                         checked = reminderEnabled,
-                        onCheckedChange = { reminderEnabled = it },
+                        onCheckedChange = { 
+                            reminderEnabled = it
+                            // Masquer le clavier lorsqu'on interagit avec le switch
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            isKeyboardVisible = false 
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.primary,
                             checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -214,6 +270,9 @@ fun AddSubscriptionDialog(
             Button(
                 onClick = {
                     if (name.isNotBlank() && price.isNotBlank()) {
+                        // Masquer le clavier avant de valider
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
                         onAdd(
                             Subscription(
                                 name = name,
@@ -235,7 +294,12 @@ fun AddSubscriptionDialog(
         },
         dismissButton = {
             TextButton(
-                onClick = onDismiss,
+                onClick = {
+                    // Masquer le clavier avant d'annuler
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    onDismiss()
+                },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
@@ -243,7 +307,8 @@ fun AddSubscriptionDialog(
                 Text("Annuler")
             }
         },
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier.imePadding() // S'assurer que le dialogue se déplace vers le haut lorsque le clavier apparaît
     )
 }
 
