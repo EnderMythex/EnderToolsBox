@@ -1,6 +1,9 @@
 package com.example.endertoolsbox.viewmodels
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.endertoolsbox.models.ChatMessage
@@ -16,22 +19,37 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Properties
 import java.util.concurrent.TimeUnit
 
-class GeminiChatViewModel : ViewModel() {
+class GeminiChatViewModel(application: Application) : AndroidViewModel(application) {
     private val _chatMessages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val chatMessages: StateFlow<List<ChatMessage>> = _chatMessages.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // N'oubliez pas de remplacer cette clé API avec votre propre clé
-    private val apiKey = "AIzaSyDYAW9yQUD2vOwVMdLeYXvnlpmej4wyRrE"
+    // Charger la clé API depuis le fichier de propriétés
+    private val apiKey: String = loadApiKey(application.applicationContext)
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
+
+    // Fonction pour charger la clé API depuis le fichier de propriétés
+    private fun loadApiKey(context: Context): String {
+        try {
+            val properties = Properties()
+            context.assets.open("apikeys.properties").use {
+                properties.load(it)
+            }
+            return properties.getProperty("GEMINI_API_KEY", "")
+        } catch (e: Exception) {
+            Log.e("GeminiChatViewModel", "Erreur lors du chargement de la clé API: ${e.message}")
+            return ""
+        }
+    }
 
     fun sendMessage(message: String) {
         if (message.isBlank()) return

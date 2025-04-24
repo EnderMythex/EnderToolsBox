@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Charger les propriétés des clés API
 android {
     namespace = "com.example.endertoolsbox"
     compileSdk = 35
@@ -36,6 +37,13 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    
+    // Assurer que le fichier assets est correctement inclus
+    sourceSets {
+        getByName("main") {
+            assets.srcDirs("src/main/assets")
+        }
     }
 }
 
