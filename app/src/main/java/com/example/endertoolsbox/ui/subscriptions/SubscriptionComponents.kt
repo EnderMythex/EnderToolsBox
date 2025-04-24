@@ -146,8 +146,7 @@ fun AddSubscriptionDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .imePadding(), // Adaptation automatique au clavier
+                    .padding(vertical = 16.dp), // Padding fixe sans adaptation au clavier
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedTextField(
@@ -307,8 +306,8 @@ fun AddSubscriptionDialog(
                 Text("Annuler")
             }
         },
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier.imePadding() // S'assurer que le dialogue se déplace vers le haut lorsque le clavier apparaît
+        shape = MaterialTheme.shapes.large
+        // Suppression de imePadding() pour que la fenêtre ne se déplace pas automatiquement
     )
 }
 

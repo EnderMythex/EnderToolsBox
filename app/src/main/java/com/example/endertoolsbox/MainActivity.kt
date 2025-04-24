@@ -60,14 +60,7 @@ class MainActivity : ComponentActivity() {
         // Configuration du mode plein écran qui utilise l'encoche
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
-        // Configuration améliorée pour la gestion du clavier
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            // Comportement d'animation du clavier
-            controlsAnimationStyle()
-            // S'assurer que le clavier ne masque pas le contenu important
-            // Note: La propriété isEnterAnimationSupported est supprimée car non disponible
-        }
+        // Suppression de la configuration du clavier qui est maintenant gérée dans le AndroidManifest
         
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -94,20 +87,9 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .statusBarsPadding()
-                        .imePadding(), // Ajouter un padding pour gérer correctement le clavier
+                        .statusBarsPadding(), // Conserver uniquement le padding pour la barre d'état
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Configurer la gestion du clavier avec animation fluide
-                    val view = LocalView.current
-                    DisposableEffect(view) {
-                        val windowInsetsController = WindowInsetsControllerCompat(window, view)
-                        windowInsetsController.systemBarsBehavior = 
-                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                        
-                        onDispose { }
-                    }
-                    
                     MainScreen(irManager, homeViewModel = homeViewModel)
                 }
             }
@@ -121,10 +103,5 @@ class MainActivity : ComponentActivity() {
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
-    }
-    
-    // Extension pour définir le style d'animation du clavier
-    private fun WindowInsetsControllerCompat.controlsAnimationStyle() {
-        this.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
 }
