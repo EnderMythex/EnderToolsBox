@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -36,7 +35,7 @@ fun MainScreen(
     irManager: ConsumerIrManager,
     subscriptionViewModel: SubscriptionViewModel = viewModel(),
     geminiChatViewModel: GeminiChatViewModel = viewModel(),
-    homeViewModel: HomeViewModel = viewModel()
+    homeViewModel: HomeViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var selectedScreen by remember { mutableStateOf(Screen.Home) }
@@ -60,12 +59,7 @@ fun MainScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .clip(MaterialTheme.shapes.large)
                         .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                                )
-                            )
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                         )
                         .padding(16.dp)
                 ) {

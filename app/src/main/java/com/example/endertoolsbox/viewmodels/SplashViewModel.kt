@@ -9,8 +9,6 @@ import com.example.endertoolsbox.services.LocationService
 import com.example.endertoolsbox.services.WeatherService
 import com.example.endertoolsbox.utils.NetworkUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,40 +44,22 @@ class SplashViewModel(private val application: Application) : AndroidViewModel(a
             updateLoadingState(0.1f, "Démarrage des services...")
             val networkAvailable = NetworkUtils.isNetworkAvailable(application.applicationContext)
             
-            // Démarrer les initialisations en parallèle
-            val locationJob = async {
-                // Initialisation des services de localisation
-                updateLoadingState(0.3f, "Chargement des services de localisation...")
-                val locationPermissionGranted = locationService.hasLocationPermission()
+            // Vérification des permissions de localisation
+            updateLoadingState(0.3f, "Chargement des services de localisation...")
+            val locationPermissionGranted = locationService.hasLocationPermission()
+            
+            if (locationPermissionGranted) {
+                // Récupération de la position actuelle
+                updateLoadingState(0.5f, "Détermination de votre position...")
+                val location = locationService.getLastLocation()
                 
-                if (locationPermissionGranted) {
-                    // Récupération de la position actuelle
-                    updateLoadingState(0.5f, "Détermination de votre position...")
-                    val location = locationService.getLastLocation()
-                    
-                    if (location != null && networkAvailable) {
-                        // Chargement des données météo
-                        updateLoadingState(0.7f, "Récupération des données météo...")
-                        val cityName = locationService.getCityName(location.latitude, location.longitude)
-                        weatherService.getWeatherForLocation(location, cityName)
-                    }
+                if (location != null && networkAvailable) {
+                    // Chargement des données météo
+                    updateLoadingState(0.7f, "Récupération des données météo...")
+                    val cityName = locationService.getCityName(location.latitude, location.longitude)
+                    weatherService.getWeatherForLocation(location, cityName)
                 }
             }
-            
-            // Initialisation du chat Gemini en parallèle
-            val geminiJob = async {
-                updateLoadingState(0.8f, "Initialisation de Gemini AI...")
-                // ...
-            }
-            
-            // Initialisation des abonnements en parallèle
-            val subscriptionsJob = async {
-                updateLoadingState(0.9f, "Chargement des abonnements...")
-                // ...
-            }
-            
-            // Attendre que toutes les initialisations soient terminées
-            awaitAll(locationJob, geminiJob, subscriptionsJob)
             
             // Finalisation
             updateLoadingState(1.0f, "Prêt !")

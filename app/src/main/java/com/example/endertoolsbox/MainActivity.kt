@@ -1,7 +1,6 @@
 package com.example.endertoolsbox
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.ConsumerIrManager
 import android.os.Bundle
 import android.view.WindowManager
@@ -10,29 +9,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.endertoolsbox.ui.MainScreen
 import com.example.endertoolsbox.ui.theme.EnderToolsTheme
 import com.example.endertoolsbox.viewmodels.HomeViewModel
 import com.example.endertoolsbox.viewmodels.SplashViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var irManager: ConsumerIrManager
@@ -45,10 +32,6 @@ class MainActivity : ComponentActivity() {
     ) { permissions ->
         val locationGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        
-        if (locationGranted) {
-            // Les permissions ont été accordées, la géolocalisation s'initialisera automatiquement
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,8 +42,6 @@ class MainActivity : ComponentActivity() {
         
         // Configuration du mode plein écran qui utilise l'encoche
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        
-        // Suppression de la configuration du clavier qui est maintenant gérée dans le AndroidManifest
         
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -87,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .statusBarsPadding(), // Conserver uniquement le padding pour la barre d'état
+                        .statusBarsPadding(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen(irManager, homeViewModel = homeViewModel)
